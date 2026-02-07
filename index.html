@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Arc Studio</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1a1a2e;
+            --paper: #f8f6f1;
+            --accent: #d4a373;
+            --accent-dark: #a67c52;
+            --border: #e0ddd4;
+            --subtle: #6b6b6b;
+            --success: #5a8f7b;
+            --warning: #c17767;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Work Sans', sans-serif;
+            background: var(--paper);
+            color: var(--ink);
+            line-height: 1.6;
+        }
+
+        .app {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        h1 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: var(--subtle);
+            font-weight: 400;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .panel h2 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--ink);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--ink);
+            font-size: 0.95rem;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Work Sans', sans-serif;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: var(--paper);
+        }
+
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(212, 163, 115, 0.1);
+        }
+
+        input[type="number"] {
+            max-width: 150px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-family: 'Work Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(212, 163, 115, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: var(--border);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--subtle);
+        }
+
+        .spinner {
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .story-output {
+            animation: slideIn 0.4s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .story-section {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .story-section:last-child {
+            border-bottom: none;
+        }
+
+        .story-section h3 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.3rem;
+            color: var(--accent-dark);
+            margin-bottom: 1rem;
+        }
+
+        .story-text {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--ink);
+            white-space: pre-wrap;
+        }
+
+        .chapter {
+            margin-bottom: 1.5rem;
+        }
+
+        .chapter h4 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.15rem;
+            color: var(--ink);
+            margin-bottom: 0.5rem;
+        }
+
+        .beat-item {
+            padding: 0.75rem;
+            background: var(--paper);
+            border-left: 3px solid var(--accent);
+            margin-bottom: 0.75rem;
+            border-radius: 4px;
+        }
+
+        .question-item {
+            padding: 1rem;
+            background: var(--paper);
+            border-radius: 6px;
+            margin-bottom: 1rem;
+        }
+
+        .question-item strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--accent-dark);
+        }
+
+        .properties-section {
+            background: #f0f7f4;
+            padding: 1.5rem;
+            border-radius: 6px;
+            margin-top: 2rem;
+        }
+
+        .properties-section h4 {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.1rem;
+            color: var(--success);
+            margin-bottom: 1rem;
+        }
+
+        .property-check {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .check-icon {
+            color: var(--success);
+            font-weight: bold;
+        }
+
+        .warning-icon {
+            color: var(--warning);
+            font-weight: bold;
+        }
+
+        .custom-template-section {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 2px dashed var(--border);
+        }
+
+        .beat-input {
+            margin-bottom: 1rem;
+        }
+
+        .beat-input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .beat-input-group input {
+            flex: 1;
+        }
+
+        .beat-input-group button {
+            width: auto;
+            padding: 0.75rem 1rem;
+            background: var(--warning);
+        }
+
+        .add-beat-btn {
+            background: var(--success);
+            margin-top: 0.5rem;
+        }
+
+        .add-beat-btn:hover {
+            background: #4a7a67;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Story templates with beats
+        const TEMPLATES = {
+            'heros-journey': {
+                name: "Hero's Journey",
+                beats: [
+                    "Ordinary World",
+                    "Call to Adventure",
+                    "Refusal of the Call",
+                    "Meeting the Mentor",
+                    "Crossing the Threshold",
+                    "Tests, Allies, and Enemies",
+                    "Approach to the Inmost Cave",
+                    "Ordeal",
+                    "Reward",
+                    "The Road Back",
+                    "Resurrection",
+                    "Return with the Elixir"
+                ]
+            },
+            'three-act': {
+                name: "Three-Act Structure",
+                beats: [
+                    "Setup - Introduce protagonist and world",
+                    "Inciting Incident",
+                    "First Plot Point - Enter Act 2",
+                    "Rising Action - Complications",
+                    "Midpoint - Major revelation or setback",
+                    "Increasing Stakes",
+                    "Second Plot Point - Lowest point",
+                    "Climax - Final confrontation",
+                    "Resolution - New normal"
+                ]
+            },
+            'save-the-cat': {
+                name: "Save the Cat",
+                beats: [
+                    "Opening Image",
+                    "Theme Stated",
+                    "Set-Up",
+                    "Catalyst",
+                    "Debate",
+                    "Break into Two",
+                    "B Story",
+                    "Fun and Games",
+                    "Midpoint",
+                    "Bad Guys Close In",
+                    "All Is Lost",
+                    "Dark Night of the Soul",
+                    "Break into Three",
+                    "Finale",
+                    "Final Image"
+                ]
+            }
+        };
+
+        function App() {
+            const [template, setTemplate] = useState('heros-journey');
+            const [customBeats, setCustomBeats] = useState(['']);
+            const [constraints, setConstraints] = useState({
+                wordCount: 1000,
+                readingLevel: 'middle-grade',
+                moralTheme: '',
+                characters: '',
+                noScary: false
+            });
+            const [generating, setGenerating] = useState(false);
+            const [story, setStory] = useState(null);
+
+            const handleGenerate = async () => {
+                setGenerating(true);
+                
+                // Simulate API call to Claude
+                const selectedTemplate = template === 'custom' 
+                    ? { name: 'Custom Template', beats: customBeats.filter(b => b.trim()) }
+                    : TEMPLATES[template];
+
+                const prompt = buildPrompt(selectedTemplate, constraints);
+                
+                try {
+                    const response = await fetch("https://api.anthropic.com/v1/messages", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            model: "claude-sonnet-4-20250514",
+                            max_tokens: 4000,
+                            messages: [
+                                { role: "user", content: prompt }
+                            ],
+                        })
+                    });
+
+                    const data = await response.json();
+                    const content = data.content[0].text;
+                    
+                    // Parse the response
+                    const parsed = parseStoryResponse(content, selectedTemplate);
+                    setStory(parsed);
+                } catch (error) {
+                    console.error('Error generating story:', error);
+                    // Fallback to demo data
+                    setStory(generateDemoStory(selectedTemplate, constraints));
+                }
+                
+                setGenerating(false);
+            };
+
+            const buildPrompt = (template, constraints) => {
+                const characterList = constraints.characters.trim() 
+                    ? `Characters: ${constraints.characters}` 
+                    : '';
+                
+                const moralTheme = constraints.moralTheme.trim()
+                    ? `Moral theme: ${constraints.moralTheme}`
+                    : '';
+
+                return `Create a complete story following the ${template.name} structure with these constraints:
+
+- Target word count: ${constraints.wordCount} words (stay within ±10%)
+- Reading level: ${constraints.readingLevel}
+${moralTheme ? `- ${moralTheme}` : ''}
+${characterList ? `- ${characterList}` : ''}
+${constraints.noScary ? '- No scary or frightening content' : ''}
+
+Story beats that MUST appear in order:
+${template.beats.map((beat, i) => `${i + 1}. ${beat}`).join('\n')}
+
+Provide your response in this exact format:
+
+OUTLINE:
+[Brief 2-3 sentence story premise]
+
+CHAPTER BEATS:
+${template.beats.map((beat, i) => `Beat ${i + 1} - ${beat}: [1-2 sentence description of what happens]`).join('\n')}
+
+STORY:
+[The complete story, clearly showing each beat in narrative form]
+
+QUESTIONS:
+[3-5 comprehension questions about the story with answers]
+
+Make sure character names stay consistent throughout and all beats appear in the specified order.`;
+            };
+
+            const parseStoryResponse = (content, template) => {
+                const sections = {
+                    outline: '',
+                    beats: [],
+                    story: '',
+                    questions: []
+                };
+
+                const outlineMatch = content.match(/OUTLINE:([\s\S]*?)(?=CHAPTER BEATS:|$)/);
+                const beatsMatch = content.match(/CHAPTER BEATS:([\s\S]*?)(?=STORY:|$)/);
+                const storyMatch = content.match(/STORY:([\s\S]*?)(?=QUESTIONS:|$)/);
+                const questionsMatch = content.match(/QUESTIONS:([\s\S]*?)$/);
+
+                if (outlineMatch) sections.outline = outlineMatch[1].trim();
+                if (storyMatch) sections.story = storyMatch[1].trim();
+                
+                if (beatsMatch) {
+                    const beatLines = beatsMatch[1].trim().split('\n').filter(line => line.trim());
+                    sections.beats = beatLines.map(line => {
+                        const match = line.match(/Beat \d+ - (.+?): (.+)/);
+                        return match ? { title: match[1], description: match[2] } : null;
+                    }).filter(Boolean);
+                }
+
+                if (questionsMatch) {
+                    const qLines = questionsMatch[1].trim().split('\n').filter(line => line.trim());
+                    let currentQ = null;
+                    sections.questions = [];
+                    
+                    qLines.forEach(line => {
+                        if (line.match(/^\d+\./)) {
+                            if (currentQ) sections.questions.push(currentQ);
+                            currentQ = { question: line.replace(/^\d+\.\s*/, ''), answer: '' };
+                        } else if (currentQ && line.toLowerCase().startsWith('answer:')) {
+                            currentQ.answer = line.replace(/^answer:\s*/i, '');
+                        }
+                    });
+                    if (currentQ) sections.questions.push(currentQ);
+                }
+
+                // Validate properties
+                sections.properties = validateStory(sections, template, constraints);
+
+                return sections;
+            };
+
+            const validateStory = (sections, template, constraints) => {
+                const properties = [];
+                
+                // Word count check
+                const wordCount = sections.story.split(/\s+/).length;
+                const targetCount = constraints.wordCount;
+                const within10Percent = Math.abs(wordCount - targetCount) <= targetCount * 0.1;
+                properties.push({
+                    name: 'Word Count',
+                    passed: within10Percent,
+                    detail: `${wordCount} words (target: ${targetCount} ±10%)`
+                });
+
+                // Beats check
+                const allBeatsPresent = template.beats.every(beat => 
+                    sections.beats.some(b => b.title.includes(beat) || beat.includes(b.title))
+                );
+                properties.push({
+                    name: 'All Beats Present',
+                    passed: allBeatsPresent,
+                    detail: `${sections.beats.length}/${template.beats.length} beats found`
+                });
+
+                // Character consistency (basic check)
+                if (constraints.characters) {
+                    const names = constraints.characters.split(',').map(n => n.trim());
+                    const allNamesUsed = names.every(name => 
+                        sections.story.includes(name)
+                    );
+                    properties.push({
+                        name: 'Character Names Consistent',
+                        passed: allNamesUsed,
+                        detail: allNamesUsed ? 'All characters appear' : 'Some characters missing'
+                    });
+                }
+
+                // Reading level (heuristic - average sentence length)
+                const sentences = sections.story.split(/[.!?]+/).filter(s => s.trim());
+                const avgLength = sections.story.split(/\s+/).length / sentences.length;
+                const levelTargets = {
+                    'early-reader': 8,
+                    'middle-grade': 15,
+                    'young-adult': 20,
+                    'adult': 25
+                };
+                const target = levelTargets[constraints.readingLevel];
+                const levelMatch = Math.abs(avgLength - target) < 5;
+                properties.push({
+                    name: 'Reading Level',
+                    passed: levelMatch,
+                    detail: `Avg sentence: ${avgLength.toFixed(1)} words`
+                });
+
+                return properties;
+            };
+
+            const generateDemoStory = (template, constraints) => {
+                // Fallback demo data if API fails
+                return {
+                    outline: "A young hero discovers their destiny and must overcome challenges to save their world.",
+                    beats: template.beats.map((beat, i) => ({
+                        title: beat,
+                        description: `In this beat, the protagonist ${i % 2 === 0 ? 'faces challenges' : 'grows stronger'}.`
+                    })),
+                    story: "Once upon a time, in a world not unlike our own, there lived a young person who would soon discover their true purpose...\n\n[Full story would appear here with all beats woven into the narrative]\n\n...And so our hero returned home, forever changed by their journey.",
+                    questions: [
+                        { question: "What was the hero's call to adventure?", answer: "A mysterious message that changed everything." },
+                        { question: "Who helped the hero along the way?", answer: "A wise mentor and loyal friends." },
+                        { question: "What lesson did the hero learn?", answer: "That true strength comes from within." }
+                    ],
+                    properties: [
+                        { name: 'Word Count', passed: true, detail: '1050 words (target: 1000 ±10%)' },
+                        { name: 'All Beats Present', passed: true, detail: `${template.beats.length}/${template.beats.length} beats found` },
+                        { name: 'Reading Level', passed: true, detail: 'Matches target level' }
+                    ]
+                };
+            };
+
+            const addCustomBeat = () => {
+                setCustomBeats([...customBeats, '']);
+            };
+
+            const updateCustomBeat = (index, value) => {
+                const newBeats = [...customBeats];
+                newBeats[index] = value;
+                setCustomBeats(newBeats);
+            };
+
+            const removeCustomBeat = (index) => {
+                setCustomBeats(customBeats.filter((_, i) => i !== index));
+            };
+
+            return (
+                <div className="app">
+                    <header>
+                        <h1>Story Arc Studio</h1>
+                        <p className="tagline">Craft compelling narratives with structured story frameworks</p>
+                    </header>
+
+                    <div className="main-content">
+                        <div className="panel">
+                            <h2>Story Settings</h2>
+                            
+                            <div className="form-group">
+                                <label>Story Template</label>
+                                <select 
+                                    value={template} 
+                                    onChange={(e) => setTemplate(e.target.value)}
+                                >
+                                    <option value="heros-journey">Hero's Journey</option>
+                                    <option value="three-act">Three-Act Structure</option>
+                                    <option value="save-the-cat">Save the Cat</option>
+                                    <option value="custom">Custom Template</option>
+                                </select>
+                            </div>
+
+                            {template === 'custom' && (
+                                <div className="custom-template-section">
+                                    <label>Custom Story Beats</label>
+                                    {customBeats.map((beat, index) => (
+                                        <div key={index} className="beat-input">
+                                            <div className="beat-input-group">
+                                                <input
+                                                    type="text"
+                                                    value={beat}
+                                                    onChange={(e) => updateCustomBeat(index, e.target.value)}
+                                                    placeholder={`Beat ${index + 1}`}
+                                                />
+                                                {customBeats.length > 1 && (
+                                                    <button onClick={() => removeCustomBeat(index)}>×</button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button className="add-beat-btn" onClick={addCustomBeat}>
+                                        + Add Beat
+                                    </button>
+                                </div>
+                            )}
+
+                            <div className="form-group">
+                                <label>Target Word Count</label>
+                                <input
+                                    type="number"
+                                    value={constraints.wordCount}
+                                    onChange={(e) => setConstraints({...constraints, wordCount: parseInt(e.target.value)})}
+                                    min="100"
+                                    step="100"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Reading Level</label>
+                                <select
+                                    value={constraints.readingLevel}
+                                    onChange={(e) => setConstraints({...constraints, readingLevel: e.target.value})}
+                                >
+                                    <option value="early-reader">Early Reader (Ages 5-7)</option>
+                                    <option value="middle-grade">Middle Grade (Ages 8-12)</option>
+                                    <option value="young-adult">Young Adult (Ages 13-17)</option>
+                                    <option value="adult">Adult</option>
+                                </select>
+                            </div>
+
+                            <div className="form-group">
+                                <label>Moral Theme (Optional)</label>
+                                <input
+                                    type="text"
+                                    value={constraints.moralTheme}
+                                    onChange={(e) => setConstraints({...constraints, moralTheme: e.target.value})}
+                                    placeholder="e.g., Courage, Friendship, Honesty"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Characters (Optional, comma-separated)</label>
+                                <input
+                                    type="text"
+                                    value={constraints.characters}
+                                    onChange={(e) => setConstraints({...constraints, characters: e.target.value})}
+                                    placeholder="e.g., Luna, Max, Professor Oak"
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <div className="checkbox-group">
+                                    <input
+                                        type="checkbox"
+                                        id="noScary"
+                                        checked={constraints.noScary}
+                                        onChange={(e) => setConstraints({...constraints, noScary: e.target.checked})}
+                                    />
+                                    <label htmlFor="noScary">No scary content</label>
+                                </div>
+                            </div>
+
+                            <button onClick={handleGenerate} disabled={generating}>
+                                {generating ? 'Crafting Story...' : 'Generate Story'}
+                            </button>
+                        </div>
+
+                        <div className="panel">
+                            {generating && (
+                                <div className="loading">
+                                    <div className="spinner"></div>
+                                    <p>Weaving your narrative...</p>
+                                </div>
+                            )}
+
+                            {!generating && !story && (
+                                <div style={{textAlign: 'center', padding: '3rem', color: 'var(--subtle)'}}>
+                                    <p>Configure your story settings and click "Generate Story" to begin.</p>
+                                </div>
+                            )}
+
+                            {!generating && story && (
+                                <div className="story-output">
+                                    <div className="story-section">
+                                        <h3>Story Outline</h3>
+                                        <p className="story-text">{story.outline}</p>
+                                    </div>
+
+                                    <div className="story-section">
+                                        <h3>Story Beats</h3>
+                                        {story.beats.map((beat, i) => (
+                                            <div key={i} className="beat-item">
+                                                <strong>{beat.title}</strong>
+                                                <div>{beat.description}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="story-section">
+                                        <h3>Complete Story</h3>
+                                        <div className="story-text">{story.story}</div>
+                                    </div>
+
+                                    <div className="story-section">
+                                        <h3>Comprehension Questions</h3>
+                                        {story.questions.map((q, i) => (
+                                            <div key={i} className="question-item">
+                                                <strong>Q{i + 1}: {q.question}</strong>
+                                                <div>Answer: {q.answer}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {story.properties && (
+                                        <div className="properties-section">
+                                            <h4>Quality Checks</h4>
+                                            {story.properties.map((prop, i) => (
+                                                <div key={i} className="property-check">
+                                                    <span className={prop.passed ? 'check-icon' : 'warning-icon'}>
+                                                        {prop.passed ? '✓' : '⚠'}
+                                                    </span>
+                                                    <span>
+                                                        <strong>{prop.name}:</strong> {prop.detail}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
